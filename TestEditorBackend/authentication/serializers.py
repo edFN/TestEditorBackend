@@ -13,7 +13,7 @@ class RegisterUserSerializer(WritableNestedModelSerializer):
     last_name = serializers.CharField(required=True)
     patronymic = serializers.CharField(required=False)
 
-    avatar = serializers.CharField(required=False)
+    avatar = serializers.ImageField(required=False)
 
     def create(self, validated_data):
         try:
@@ -37,6 +37,5 @@ class RegisterUserSerializer(WritableNestedModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('email', 'birth_date',
-                  'first_name', 'last_name', 'patronymic',
-                  'avatar')
+        fields = ('first_name', 'last_name', 'patronymic',
+                  'email', 'birth_date', 'avatar')
