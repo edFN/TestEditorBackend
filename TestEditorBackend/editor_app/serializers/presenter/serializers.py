@@ -1,9 +1,8 @@
 from drf_writable_nested import WritableNestedModelSerializer
 from rest_framework import serializers
-from editor_app.models import TestQuestionModel, TestAnswerModel, TypeTestModel, TestModel
+from editor_app.models import TestQuestionModel, TestAnswerModel, TypeTestModel, TestModel,HashTagsModel
 from authentication.models import User
 from rest_framework.exceptions import ValidationError
-
 
 class QuestionAnswerSerializer(WritableNestedModelSerializer):
     class Meta:
@@ -22,15 +21,25 @@ class TestQuestionSerializer(WritableNestedModelSerializer):
 class TestSerializerPresenter(WritableNestedModelSerializer):
     author = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), required=True)
 
-    type = serializers.PrimaryKeyRelatedField(queryset=TypeTestModel.objects.all(), required=True)
+    type = serializers.SerializerMethodField(required=False)
+
+    created_at = serializers.DateField(format="%d/%m/%Y", required=False)
 
     questions = TestQuestionSerializer(many=True, required=False, source="test_question_rel")
+
+    def get_type(self,obj):
+        return obj.type.name if obj.type else ""
 
     class Meta:
         fields = '__all__'
         model = TestModel
         depth = 2
 
+
+class HashTagsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = HashTagsModel
+        fields = '__all__'
 
 class AnswerValidatorSerializer(serializers.Serializer):
     answer_text = serializers.CharField(label="Письменный ответ", required=False, allow_blank=True, allow_null=True,

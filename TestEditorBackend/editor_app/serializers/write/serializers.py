@@ -1,7 +1,9 @@
 from drf_writable_nested import WritableNestedModelSerializer
 from rest_framework import serializers
-from editor_app.models import TestQuestionModel, TestAnswerModel, TypeTestModel, TestModel
+from editor_app.models import TestQuestionModel, TestAnswerModel, TypeTestModel, TestModel, HashTagsModel
 from authentication.models import User
+
+
 
 
 class QuestionAnswerSerializerWriter(WritableNestedModelSerializer):
@@ -31,7 +33,9 @@ class TestSerializerWriter(WritableNestedModelSerializer):
 
     image = serializers.CharField(label="Изображение", required=False, allow_null=True)
 
-
+    hashtags = serializers.PrimaryKeyRelatedField(queryset=HashTagsModel.objects.all(), many=True, allow_null=True,
+                                                  allow_empty=True)
+    created_at = serializers.DateField(format="%d/%m/%Y", required=False)
     class Meta:
         fields = '__all__'
         model = TestModel

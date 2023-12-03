@@ -10,6 +10,12 @@ class TypeTestModel(models.Model):
         return self.name or ''
 
 
+class HashTagsModel(models.Model):
+    name = models.CharField("Название хэштега", max_length=200)
+
+    def __str__(self):
+        return self.name or ''
+
 class TestModel(models.Model):
     author = models.ForeignKey(User, verbose_name='Автор', null=False, blank=False, on_delete=models.CASCADE)
 
@@ -28,6 +34,12 @@ class TestModel(models.Model):
     is_different_msg = models.BooleanField("Сообщения в зависимости от баллов", null=True,blank=True, default=False)
 
     type = models.ForeignKey(to=TypeTestModel, verbose_name="Тип теста", null=True, on_delete=models.SET_NULL)
+
+    hashtags = models.ManyToManyField(HashTagsModel, verbose_name="Хэштеги", null=True,blank=True)
+
+    created_at = models.DateField("Создан", auto_now=True)
+
+
 
     def __str__(self):
         return self.title or ''

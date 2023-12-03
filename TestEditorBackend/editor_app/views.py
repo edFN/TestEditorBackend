@@ -1,23 +1,51 @@
 from django.shortcuts import render
+
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
+from rest_framework.filters import SearchFilter
 from rest_framework.response import Response
 
 from .admin import TestModel
-from .models import MessageFinishedTest
-from .serializers.presenter.serializers import TestSerializerPresenter, AnswerSetValidatorSerializer
+from .models import MessageFinishedTest, HashTagsModel, TypeTestModel
+from .serializers.presenter.serializers import TestSerializerPresenter, AnswerSetValidatorSerializer, HashTagsSerializer
 from .serializers.write.serializers import TestSerializerWriter
 from core.mixins.upload_mixin import UploadMixin
 
 from .services.check_correct_answers import AnswerCheckService
-from .utils import get_message_points
+from .utils import get_message_points, MyMetaData
+
+from django_filters import rest_framework as filters
 
 
-# Create your views here.
+class TestFilter(filters.FilterSet):
+    created_at_in = filters.DateFilter(field_name='created_at', lookup_expr='gte', input_formats=['%d/%m/%Y'])
+    created_at_out = filters.DateFilter(field_name='created_at', lookup_expr='lte',input_formats=['%d/%m/%Y'])
+    type = filters.CharFilter(field_name='type', method="filter_type")
+    class Meta:
+        model = TestModel
+        fields = ['is_private', 'type', 'created_at_in', 'created_at_out']
+
+    def filter_type(self, queryset, name, value):
+        print(value)
+
+        types = value.split(',') if value else []
+        return queryset.filter(type__in=types)
+
+class HashTagViewSet(viewsets.ModelViewSet):
+    serializer_class = HashTagsSerializer
+    filter_backends = [SearchFilter]
+    search_fields = ["name"]
+    queryset = HashTagsModel.objects.all()
 
 class TestViewSet(viewsets.ModelViewSet, UploadMixin):
     serializer_class = TestSerializerPresenter
     queryset = TestModel.objects.all()
+    metadata_class = MyMetaData
+
+    filter_backends = [DjangoFilterBackend, SearchFilter]
+    search_fields = ['title', 'description']
+    filterset_class = TestFilter
 
     def create(self, request, *args, **kwargs):
         serializer = TestSerializerWriter(data=request.data)
@@ -48,7 +76,6 @@ class TestViewSet(viewsets.ModelViewSet, UploadMixin):
         if instance.is_record_statistic:
             pass
 
-
         return Response(status=status.HTTP_200_OK)
 
     def update(self, request, *args, **kwargs):
@@ -65,3 +92,8 @@ class TestViewSet(viewsets.ModelViewSet, UploadMixin):
 
         return Response(serializer.data)
 
+    def options(self, request, *args, **kwargs):
+        self.serializer_class = TestSerializerWriter
+        data = super().options(request, *args, **kwargs)
+        self.serializer_class = TestSerializerPresenter
+        return data
