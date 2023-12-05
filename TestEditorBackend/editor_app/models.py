@@ -48,8 +48,8 @@ class TestModel(models.Model):
 class MessageFinishedTest(models.Model):
     test = models.ForeignKey(TestModel, null=True, blank=True, related_name='message_finish_rel',
                              on_delete=models.CASCADE)
-    description = models.TextField(null=True,blank=False)
-    title = models.CharField("Т", max_length=256, null=True,blank=True)
+    text = models.TextField(null=True,blank=False)
+
     points = models.IntegerField(default=0)
 
 
@@ -63,7 +63,7 @@ class TypeQuestionModel(models.Model):
 class TestQuestionModel(models.Model):
     test = models.ForeignKey(TestModel, null=True, blank=True, related_name='test_question_rel',
                              on_delete=models.CASCADE)
-    question = models.CharField("Вопрос", max_length=256, null=True, blank=True)
+    question = models.TextField("Вопрос", max_length=256, null=True, blank=True)
     type = models.ForeignKey(TypeQuestionModel, null=True, blank=True, on_delete=models.SET_NULL)
 
     has_diff_point = models.BooleanField(default=False)
