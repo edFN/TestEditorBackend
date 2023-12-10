@@ -1,3 +1,5 @@
+import os.path
+
 from drf_writable_nested import WritableNestedModelSerializer
 from rest_framework import serializers
 from editor_app.models import TestQuestionModel, TestAnswerModel, TypeTestModel, TestModel, HashTagsModel, \
@@ -41,8 +43,12 @@ class TestSerializerWriter(WritableNestedModelSerializer):
                                                   allow_empty=True)
     created_at = serializers.DateField(format="%d/%m/%Y", required=False)
 
-    message_results = MessageFinishedTestSerializer(required=False,source='message_finish_rel', many=True)
+    message_results = MessageFinishedTestSerializer(source='message_finish_rel', required=False,many=True)
 
+    def update(self, instance, validated_data):
+        if validated_data['image'] is not None:
+            validated_data['image'] = os.path.basename((validated_data['image']))
+        return super().update(instance, validated_data)
 
     class Meta:
         fields = '__all__'

@@ -8,7 +8,8 @@ from rest_framework.response import Response
 
 from .admin import TestModel
 from .models import MessageFinishedTest, HashTagsModel, TypeTestModel
-from .serializers.presenter.serializers import TestSerializerPresenter, AnswerSetValidatorSerializer, HashTagsSerializer
+from .serializers.presenter.serializers import TestSerializerPresenter, AnswerSetValidatorSerializer, \
+    HashTagsSerializer, TestStandartSerializerPresenter
 from .serializers.write.serializers import TestSerializerWriter
 from core.mixins.upload_mixin import UploadMixin
 
@@ -20,11 +21,12 @@ from django_filters import rest_framework as filters
 
 class TestFilter(filters.FilterSet):
     created_at_in = filters.DateFilter(field_name='created_at', lookup_expr='gte', input_formats=['%d/%m/%Y'])
-    created_at_out = filters.DateFilter(field_name='created_at', lookup_expr='lte',input_formats=['%d/%m/%Y'])
+    created_at_out = filters.DateFilter(field_name='created_at', lookup_expr='lte', input_formats=['%d/%m/%Y'])
     type = filters.CharFilter(field_name='type', method="filter_type")
+
     class Meta:
         model = TestModel
-        fields = ['is_private', 'type', 'created_at_in', 'created_at_out']
+        fields = ['is_private', 'type', 'created_at_in', 'created_at_out', 'author']
 
     def filter_type(self, queryset, name, value):
         print(value)
@@ -32,11 +34,13 @@ class TestFilter(filters.FilterSet):
         types = value.split(',') if value else []
         return queryset.filter(type__in=types)
 
+
 class HashTagViewSet(viewsets.ModelViewSet):
     serializer_class = HashTagsSerializer
     filter_backends = [SearchFilter]
     search_fields = ["name"]
     queryset = HashTagsModel.objects.all()
+
 
 class TestViewSet(viewsets.ModelViewSet, UploadMixin):
     serializer_class = TestSerializerPresenter
@@ -53,6 +57,29 @@ class TestViewSet(viewsets.ModelViewSet, UploadMixin):
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def get_serializer_(self, serializer_class, *args, **kwargs):
+        """
+        Return the serializer instance that should be used for validating and
+        deserializing input, and for serializing output.
+        """
+        kwargs.setdefault('context', self.get_serializer_context())
+        return serializer_class(*args, **kwargs)
+
+    def retrieve(self, request, *args, **kwargs):
+
+        instance = self.get_object()
+
+        data = request.GET.get("standart", False)
+
+        if data:
+            serializer = self.get_serializer_(TestStandartSerializerPresenter, instance)
+        else:
+            serializer = self.get_serializer(instance)
+            instance.views += 1
+            instance.save()
+
+        return Response(serializer.data)
 
     @action(detail=True, methods=['POST'])
     def accept_answers(self, request, *args, **kwargs):
@@ -80,6 +107,7 @@ class TestViewSet(viewsets.ModelViewSet, UploadMixin):
 
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
+
         instance = self.get_object()
         serializer = TestSerializerWriter(instance, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)

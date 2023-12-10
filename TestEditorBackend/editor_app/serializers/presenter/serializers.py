@@ -4,6 +4,9 @@ from editor_app.models import TestQuestionModel, TestAnswerModel, TypeTestModel,
 from authentication.models import User
 from rest_framework.exceptions import ValidationError
 
+from editor_app.serializers.write.serializers import MessageFinishedTestSerializer
+
+
 class QuestionAnswerSerializer(WritableNestedModelSerializer):
     class Meta:
         exclude = ('is_right',)
@@ -62,3 +65,24 @@ class AnswerValidatorSerializer(serializers.Serializer):
 
 class AnswerSetValidatorSerializer(serializers.Serializer):
     answers = AnswerValidatorSerializer(many=True, required=True)
+
+
+class TestStandartSerializerPresenter(WritableNestedModelSerializer):
+    author = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), required=True)
+
+    type = serializers.PrimaryKeyRelatedField(queryset=TypeTestModel.objects.all(), required=True)
+
+    questions = TestQuestionSerializer(many=True, required=False, source="test_question_rel")
+
+ #   image = serializers.ImageField(label="Изображение", required=False, allow_null=True)
+
+    hashtags = serializers.PrimaryKeyRelatedField(queryset=HashTagsModel.objects.all(), many=True, allow_null=True,
+                                                  allow_empty=True)
+    created_at = serializers.DateField(format="%d/%m/%Y", required=False)
+
+    message_results = MessageFinishedTestSerializer(source='message_finish_rel',required=False,  many=True)
+
+    class Meta:
+        fields = '__all__'
+        model = TestModel
+        depth = 2
