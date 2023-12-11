@@ -6,9 +6,13 @@ class EditorAppConfig(AppConfig):
     name = 'editor_app'
 
     def ready(self):
-        from .models import TypeQuestionModel
+        try:
+            from .models import TypeQuestionModel
 
-        TypeQuestionModel.objects.get_or_create(name="Text")
-        TypeQuestionModel.objects.get_or_create(name="ONE_VARIANT")
-        TypeQuestionModel.objects.get_or_create(name="MULTIPLE_VARIANT")
+            TypeQuestionModel.objects.get_or_create(name="Text")
+            TypeQuestionModel.objects.get_or_create(name="ONE_VARIANT")
+            TypeQuestionModel.objects.get_or_create(name="MULTIPLE_VARIANT")
+        except:
+            print("No table trying to add")
+            
 
