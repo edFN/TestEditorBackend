@@ -14,6 +14,7 @@ from .serializers.write.serializers import TestSerializerWriter
 from core.mixins.upload_mixin import UploadMixin
 
 from .services.check_correct_answers import AnswerCheckService
+from .services.record_user_test_stat import RecordStatisticService
 from .utils import get_message_points, MyMetaData
 
 from django_filters import rest_framework as filters
@@ -44,7 +45,7 @@ class HashTagViewSet(viewsets.ModelViewSet):
 
 class TestViewSet(viewsets.ModelViewSet, UploadMixin):
     serializer_class = TestSerializerPresenter
-    queryset = TestModel.objects.all()
+    queryset = TestModel.objects.all().order_by("-pk")
     metadata_class = MyMetaData
 
     filter_backends = [DjangoFilterBackend, SearchFilter]
@@ -90,20 +91,34 @@ class TestViewSet(viewsets.ModelViewSet, UploadMixin):
 
         serializer.is_valid(raise_exception=True)
 
+        print("Validated data", serializer.validated_data)
+
+        if len(serializer.validated_data) == 0:
+            return Response(status=200)
+
         points = AnswerCheckService.check_answers(entry=serializer.validated_data)
 
         data = {
             "points": points,
+            "message": f"Ваш результат:  {points}",
+            "checklist": None
         }
 
-        if instance.is_different_msg:
-            print("DifferentMessage", get_message_points("points"))
-            data['message'] = get_message_points(points)
+        print(data)
+
+        print(request.data, points)
+
+        if instance.has_messages():
+            print("DifferentMessage", get_message_points(points, instance))
+            data['message'] = get_message_points(points, instance)
+
+        protocol_id = RecordStatisticService.record_statistic(request.user,
+                                                              serializer.validated_data.get("answers"),points)
 
         if instance.is_record_statistic:
-            pass
+            data['protocol_id'] = protocol_id
 
-        return Response(status=status.HTTP_200_OK)
+        return Response(data, status=status.HTTP_200_OK)
 
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)

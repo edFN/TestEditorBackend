@@ -40,6 +40,9 @@ class TestModel(models.Model):
     created_at = models.DateField("Создан", auto_now=True)
 
 
+    def has_messages(self):
+        return MessageFinishedTest.objects.filter(test=self).exists()
+
 
     def __str__(self):
         return self.title or ''
@@ -86,11 +89,16 @@ class TestAnswerModel(models.Model):
         return f'{self.question}#{self.pk}'
 
 
-class UserAnswerRecord(models.Model):
+class ProtocolRecord(models.Model):
+    create_at = models.DateField(auto_now=True)
     answer_user = models.ForeignKey(User, null=False, blank=False, on_delete=models.CASCADE)
+    score = models.IntegerField(default=0)
+
+class UserAnswerRecord(models.Model):
+    protocol = models.ForeignKey(ProtocolRecord, null=True, blank=False, on_delete=models.CASCADE)
     question = models.ForeignKey(TestQuestionModel, null=False, blank=False, on_delete=models.CASCADE)
     answer_id = models.ForeignKey(TestAnswerModel, null=False, blank=True, on_delete=models.CASCADE)
-    wrong_answer_text = models.CharField("Неправильный ответ в виде текста", null=True,blank=True,max_length=256)
+    answer_text = models.CharField("Неправильный ответ в виде текста", null=True,blank=True,max_length=256)
 
     def __str__(self):
         return f'ответ пользователя {self.answer_user}'
@@ -98,3 +106,5 @@ class UserAnswerRecord(models.Model):
 # class AnswerModel(models.Model):
 #     question = models.ForeignKey(TestQuestionModel, null=True, blank=True, on_delete=models.CASCADE)
 #     image = models.ImageField("Изображение", null=True,bl)
+
+

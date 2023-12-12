@@ -12,10 +12,12 @@ class CheckOneVariant(CheckStrategy):
     def check(self, entry):
         answer = entry['answer_id'][0]
 
+        print("Answer", answer.__dict__)
+
         if not answer.is_right:
             return 0
 
-        if entry['question'].has_diff_point:
+        if entry['question_id'].has_diff_point:
             return answer.answer_points
 
         return 1
@@ -47,11 +49,11 @@ class CheckTextType(CheckStrategy):
 
 
 def factory_check_question_answer(type, entry):
-    if type == 'ONE_VARIANT':
+    if type.name == 'ONE_VARIANT':
         return CheckOneVariant().check(entry)
-    if type == 'MULTIPLE_VARIANT':
+    if type.name == 'MULTIPLE_VARIANT':
         return CheckMultipleVariant().check(entry)
-    if type == 'TEXT':
+    if type.name == 'TEXT':
         return CheckTextType().check(entry)
 
     raise NotImplementedError("Not implemented for type: %s" % type)
@@ -62,6 +64,6 @@ class AnswerCheckService:
     def check_answers(entry):
         points = 0
         for answer in entry['answers']:
-            points += factory_check_question_answer(answer['question_id'].type, entry)
+            points += factory_check_question_answer(answer['question_id'].type, answer)
 
         return points

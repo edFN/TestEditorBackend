@@ -7,11 +7,23 @@ from rest_framework.exceptions import ValidationError
 from editor_app.serializers.write.serializers import MessageFinishedTestSerializer
 
 
+class StandartQuestionAnswerSerializer(WritableNestedModelSerializer):
+    class Meta:
+        fields = '__all__'
+        model = TestAnswerModel
+
 class QuestionAnswerSerializer(WritableNestedModelSerializer):
     class Meta:
         exclude = ('is_right',)
         model = TestAnswerModel
 
+
+class StandartTestQuestionSerializer(WritableNestedModelSerializer):
+    answers = StandartQuestionAnswerSerializer(many=True, required=False, source="question_answer_rel")
+
+    class Meta:
+        model = TestQuestionModel
+        fields = '__all__'
 
 class TestQuestionSerializer(WritableNestedModelSerializer):
     answers = QuestionAnswerSerializer(many=True, required=False, source="question_answer_rel")
@@ -19,7 +31,6 @@ class TestQuestionSerializer(WritableNestedModelSerializer):
     class Meta:
         model = TestQuestionModel
         fields = '__all__'
-
 
 class TestSerializerPresenter(WritableNestedModelSerializer):
     author = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), required=True)
@@ -72,7 +83,7 @@ class TestStandartSerializerPresenter(WritableNestedModelSerializer):
 
     type = serializers.PrimaryKeyRelatedField(queryset=TypeTestModel.objects.all(), required=True)
 
-    questions = TestQuestionSerializer(many=True, required=False, source="test_question_rel")
+    questions = StandartTestQuestionSerializer(many=True, required=False, source="test_question_rel")
 
  #   image = serializers.ImageField(label="Изображение", required=False, allow_null=True)
 

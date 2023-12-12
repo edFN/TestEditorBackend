@@ -1,12 +1,13 @@
+from django.db.models import Q
 from django.utils.encoding import force_str
 from editor_app.models import MessageFinishedTest
 from rest_framework.metadata import SimpleMetadata
 from rest_framework.relations import HyperlinkedRelatedField, PrimaryKeyRelatedField, RelatedField, ManyRelatedField
 
 
-def get_message_points(points):
-    return MessageFinishedTest.objects.filter(points__gte=points)\
-        .order_by('points').first().values
+def get_message_points(points, instance):
+    return MessageFinishedTest.objects.filter(Q(points__gte=points) & Q(test=instance))\
+        .order_by('points').first().text
 
 class MyMetaData(SimpleMetadata):
 

@@ -12,7 +12,7 @@ class QuestionAnswerSerializerWriter(WritableNestedModelSerializer):
     answer_text = serializers.CharField(required=False, allow_null=True)
 
     class Meta:
-        exclude = ('is_right',)
+        fields='__all__'
         model = TestAnswerModel
 
 
