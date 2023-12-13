@@ -24,7 +24,7 @@ class RecordStatisticService:
 
             if len(answer['answer_text']) > 0:
                 answer_record = UserAnswerRecord(protocol=protocol, question=answer['question_id'],
-                                                 wrong_answer_text=answer['answer_text'])
+                                                 answer_text=answer['answer_text'])
                 answers_create.append(answer_record)
 
         UserAnswerRecord.objects.bulk_create(answers_create)

@@ -97,7 +97,7 @@ class ProtocolRecord(models.Model):
 class UserAnswerRecord(models.Model):
     protocol = models.ForeignKey(ProtocolRecord, null=True, blank=False, on_delete=models.CASCADE)
     question = models.ForeignKey(TestQuestionModel, null=False, blank=False, on_delete=models.CASCADE)
-    answer_id = models.ForeignKey(TestAnswerModel, null=False, blank=True, on_delete=models.CASCADE)
+    answer_id = models.ForeignKey(TestAnswerModel, null=True, blank=True, on_delete=models.CASCADE)
     answer_text = models.CharField("Неправильный ответ в виде текста", null=True,blank=True,max_length=256)
 
     def __str__(self):
