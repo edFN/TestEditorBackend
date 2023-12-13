@@ -7,7 +7,8 @@ from rest_framework.filters import SearchFilter
 from rest_framework.response import Response
 
 from .admin import TestModel
-from .models import MessageFinishedTest, HashTagsModel, TypeTestModel
+from .models import MessageFinishedTest, HashTagsModel, TypeTestModel, ProtocolRecord
+from .protocol.serializer import ProtocolSerializer
 from .serializers.presenter.serializers import TestSerializerPresenter, AnswerSetValidatorSerializer, \
     HashTagsSerializer, TestStandartSerializerPresenter
 from .serializers.write.serializers import TestSerializerWriter
@@ -42,6 +43,11 @@ class HashTagViewSet(viewsets.ModelViewSet):
     search_fields = ["name"]
     queryset = HashTagsModel.objects.all()
 
+
+class ProtocolViewSet(viewsets.ModelViewSet):
+    serializer_class = ProtocolSerializer
+    queryset = ProtocolRecord.objects.all()
+    metadata_class = MyMetaData
 
 class TestViewSet(viewsets.ModelViewSet, UploadMixin):
     serializer_class = TestSerializerPresenter
@@ -113,10 +119,10 @@ class TestViewSet(viewsets.ModelViewSet, UploadMixin):
             data['message'] = get_message_points(points, instance)
 
         protocol_id = RecordStatisticService.record_statistic(request.user,
-                                                              serializer.validated_data.get("answers"),points)
+                                                              serializer.validated_data.get("answers"), points)
 
         if instance.is_record_statistic:
-            data['protocol_id'] = protocol_id
+            data['checklist'] = protocol_id
 
         return Response(data, status=status.HTTP_200_OK)
 

@@ -95,13 +95,13 @@ class ProtocolRecord(models.Model):
     score = models.IntegerField(default=0)
 
 class UserAnswerRecord(models.Model):
-    protocol = models.ForeignKey(ProtocolRecord, null=True, blank=False, on_delete=models.CASCADE)
+    protocol = models.ForeignKey(ProtocolRecord, null=True, blank=False, on_delete=models.CASCADE,
+                                 related_name="protocol_answer_rel")
     question = models.ForeignKey(TestQuestionModel, null=False, blank=False, on_delete=models.CASCADE)
     answer_id = models.ForeignKey(TestAnswerModel, null=True, blank=True, on_delete=models.CASCADE)
     answer_text = models.CharField("Неправильный ответ в виде текста", null=True,blank=True,max_length=256)
 
-    def __str__(self):
-        return f'ответ пользователя {self.answer_user}'
+
 
 # class AnswerModel(models.Model):
 #     question = models.ForeignKey(TestQuestionModel, null=True, blank=True, on_delete=models.CASCADE)

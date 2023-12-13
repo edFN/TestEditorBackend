@@ -6,8 +6,14 @@ from rest_framework.relations import HyperlinkedRelatedField, PrimaryKeyRelatedF
 
 
 def get_message_points(points, instance):
-    return MessageFinishedTest.objects.filter(Q(points__gte=points) & Q(test=instance))\
-        .order_by('points').first().text
+    print(points)
+    item = MessageFinishedTest.objects.filter(Q(points__lte=points) & Q(test=instance))\
+        .order_by('points').last()
+
+    if item is None:
+        return ""
+
+    return item.text
 
 class MyMetaData(SimpleMetadata):
 
