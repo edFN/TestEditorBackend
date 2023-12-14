@@ -49,6 +49,15 @@ class ProtocolViewSet(viewsets.ModelViewSet):
     queryset = ProtocolRecord.objects.all()
     metadata_class = MyMetaData
 
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+
+        if request.user != instance.answer_user and request.user != instance.test.author:
+            return Response(status=400)
+
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
+
 class TestViewSet(viewsets.ModelViewSet, UploadMixin):
     serializer_class = TestSerializerPresenter
     queryset = TestModel.objects.all().order_by("-pk")

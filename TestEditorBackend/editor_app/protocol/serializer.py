@@ -14,7 +14,10 @@ def filter_for_text(obj):
 
 class ProtocolSerializer(serializers.ModelSerializer):
     test_answers = serializers.SerializerMethodField()
+    user_answer = serializers.SerializerMethodField()
 
+    def get_user_answer(self,obj):
+        return str(obj.answer_user)
     def get_test_answers(self, obj):
         items = UserAnswerRecord.objects.filter(protocol=obj)
 
@@ -31,6 +34,7 @@ class ProtocolSerializer(serializers.ModelSerializer):
         print("TestAnswer", text_answer)
 
 
+
         for answer in answer_choice:
 
             print("Answer", answer.__dict__)
@@ -39,8 +43,6 @@ class ProtocolSerializer(serializers.ModelSerializer):
                 set_by_question[answer.question] = [answer]
             else:
                 set_by_question[answer.question].append(answer)
-
-
 
         for question in set_by_question.keys():
             right_answers = TestAnswerModel.objects.filter(Q(is_right=True) & Q(question=question))
@@ -53,7 +55,7 @@ class ProtocolSerializer(serializers.ModelSerializer):
             })
 
         for item in text_answer:
-            right_answer = TestAnswerModel.objects.filter(Q(is_right=True) & Q(question =item.question)).first()
+            right_answer = TestAnswerModel.objects.filter(Q(is_right=True) & Q(question=item.question)).first()
             output_data.append({
                 "type": "TEXT",
                 "question": item.question.question,

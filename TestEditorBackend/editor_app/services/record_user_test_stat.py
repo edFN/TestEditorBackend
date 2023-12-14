@@ -9,7 +9,8 @@ class RecordStatisticService:
     @staticmethod
     def record_statistic(user, entries, score):
         print("Record Entries",entries)
-        protocol = ProtocolRecord(answer_user=user,score=score)
+        protocol = ProtocolRecord(answer_user=user,score=score,
+                                  test=entries[0]['question_id'].test)
 
         protocol.save()
 

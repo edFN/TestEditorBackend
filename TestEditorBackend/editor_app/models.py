@@ -93,6 +93,7 @@ class ProtocolRecord(models.Model):
     create_at = models.DateField(auto_now=True)
     answer_user = models.ForeignKey(User, null=False, blank=False, on_delete=models.CASCADE)
     score = models.IntegerField(default=0)
+    test = models.ForeignKey(TestModel, null=True,blank=True, on_delete=models.CASCADE)
 
 class UserAnswerRecord(models.Model):
     protocol = models.ForeignKey(ProtocolRecord, null=True, blank=False, on_delete=models.CASCADE,
