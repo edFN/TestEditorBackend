@@ -32,7 +32,6 @@ class TestFilter(filters.FilterSet):
 
     def filter_type(self, queryset, name, value):
         print(value)
-
         types = value.split(',') if value else []
         return queryset.filter(type__in=types)
 
@@ -49,6 +48,10 @@ class ProtocolViewSet(viewsets.ModelViewSet):
     queryset = ProtocolRecord.objects.all()
     metadata_class = MyMetaData
 
+    filter_backends = [DjangoFilterBackend]
+
+    filterset_fields = ['test']
+
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
 
@@ -57,6 +60,7 @@ class ProtocolViewSet(viewsets.ModelViewSet):
 
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
+
 
 class TestViewSet(viewsets.ModelViewSet, UploadMixin):
     serializer_class = TestSerializerPresenter
@@ -110,6 +114,13 @@ class TestViewSet(viewsets.ModelViewSet, UploadMixin):
 
         if len(serializer.validated_data) == 0:
             return Response(status=200)
+
+        if len(serializer.validated_data.get("answers")) == 0:
+            return Response(data={
+                "points": 0,
+                "message": f"Ваш результат:  {0}",
+                "checklist": None
+            })
 
         points = AnswerCheckService.check_answers(entry=serializer.validated_data)
 
