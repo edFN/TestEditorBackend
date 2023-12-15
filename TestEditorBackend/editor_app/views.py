@@ -55,6 +55,10 @@ class ProtocolViewSet(viewsets.ModelViewSet):
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
 
+        if instance.answer_user is None:
+            serializer = self.get_serializer(instance)
+            return Response(serializer.data)
+
         if request.user != instance.answer_user and request.user != instance.test.author:
             return Response(status=400)
 

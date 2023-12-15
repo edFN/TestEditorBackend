@@ -16,8 +16,12 @@ class ProtocolSerializer(serializers.ModelSerializer):
     test_answers = serializers.SerializerMethodField()
     user_answer = serializers.SerializerMethodField()
 
-    def get_user_answer(self,obj):
-        return str(obj.answer_user)
+    def get_user_answer(self, obj):
+        if obj.answer_user is not None:
+            return str(obj.answer_user)
+        else:
+            return "Аноним"
+
     def get_test_answers(self, obj):
         items = UserAnswerRecord.objects.filter(protocol=obj)
 
@@ -32,8 +36,6 @@ class ProtocolSerializer(serializers.ModelSerializer):
         text_answer = list(filter(filter_for_text, items))
 
         print("TestAnswer", text_answer)
-
-
 
         for answer in answer_choice:
 

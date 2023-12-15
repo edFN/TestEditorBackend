@@ -91,7 +91,7 @@ class TestAnswerModel(models.Model):
 
 class ProtocolRecord(models.Model):
     create_at = models.DateField(auto_now=True)
-    answer_user = models.ForeignKey(User, null=False, blank=False, on_delete=models.CASCADE)
+    answer_user = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL)
     score = models.IntegerField(default=0)
     test = models.ForeignKey(TestModel, null=True,blank=True, on_delete=models.CASCADE)
 
